@@ -663,17 +663,6 @@ Eventually, I want to turn this into a more complete personal job intelligence s
 
 ---
 
-## 📸 Screenshots
-
-> Add screenshots of the workflow and outputs here.
-
-- n8n Workflow
-- Apify Output
-- AI Evaluation
-- Google Sheets
-
----
-
 ## 🤝 Contributing
 
 This is primarily a personal portfolio project, but suggestions and improvements are welcome.
