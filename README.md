@@ -112,12 +112,6 @@ The final decision to apply is still made manually by me.
                  │   Google Sheets  │
                  │   Shortlisted    │
                  │   Opportunities  │
-                 └────────┬─────────┘
-                          │
-                          ▼
-                 ┌──────────────────┐
-                 │ Telegram Alerts  │
-                 │    (Planned)     │
                  └──────────────────┘
 ```
 
@@ -371,8 +365,6 @@ The system attempts to remove posts such as:
 - Paid job groups
 - Paid communities
 - Job alert groups
-- Telegram job groups
-- WhatsApp job groups
 - Paid mentorship
 - Paid courses
 - Bootcamps
@@ -403,7 +395,7 @@ A company email is useful but not mandatory. A missing email should not automati
 
 ### 📊 12. Google Sheets
 
-After AI evaluation, opportunities meeting the required score threshold can be stored in Google Sheets.
+After AI evaluation, opportunities meeting the required score threshold are stored in Google Sheets.
 
 Example fields include:
 
@@ -429,38 +421,7 @@ Example fields include:
 - Education Match
 - Reason
 
-This creates a searchable record of opportunities discovered by the automation.
-
-### 🔔 13. Telegram Notifications
-
-Telegram notification is planned as the next stage of the project.
-
-The idea is to receive a notification when a strong opportunity is found.
-
-**Example:**
-
-```
-🔥 92% MATCH — DATA ANALYST
-
-Company: Example Company
-Location: Bengaluru
-Experience: 0–2 years
-Posted by: HR Manager
-
-Skills:
-SQL | Power BI | Excel
-
-Recommendation:
-APPLY ASAP
-
-Application:
-Company Careers Page
-
-Why:
-Strong match with my Data Analyst profile.
-```
-
-This allows me to review the opportunity quickly instead of repeatedly searching LinkedIn.
+This creates a searchable record of opportunities discovered by the automation, ready for manual review.
 
 ---
 
@@ -494,7 +455,6 @@ Review → Open LinkedIn → Check the job → Apply manually
 | Google Gemini | AI-based job evaluation |
 | Structured Output Parser | Consistent AI output |
 | Google Sheets | Store shortlisted jobs |
-| Telegram | Notifications (planned) |
 
 ---
 
@@ -560,10 +520,6 @@ Add your Gemini credentials to n8n. The Gemini model is used for evaluating indi
 
 Connect your Google account to n8n and select the spreadsheet where shortlisted opportunities should be stored.
 
-### 6. Configure Telegram
-
-Telegram integration can be enabled if notification functionality is required.
-
 ---
 
 ## 🔒 Security
@@ -575,7 +531,6 @@ Before publishing the workflow, remove or replace:
 - Apify API keys
 - Gemini API keys
 - Google credentials
-- Telegram bot tokens
 - OAuth tokens
 - Session cookies
 
@@ -586,7 +541,6 @@ Example:
 ```
 APIFY_API_TOKEN=your_token_here
 GEMINI_API_KEY=your_key_here
-TELEGRAM_BOT_TOKEN=your_token_here
 ```
 
 Also add sensitive files to `.gitignore`.
@@ -630,7 +584,6 @@ This project is currently under active development.
 - [ ] Reduce false positives
 - [ ] Improve duplicate detection
 - [ ] Improve authenticity scoring
-- [ ] Telegram notifications
 - [ ] Job-search analytics dashboard
 - [ ] Track applications and outcomes
 
@@ -700,7 +653,6 @@ Some ideas I want to explore next:
 - Improved semantic skill matching
 - Company quality scoring
 - Duplicate detection using semantic similarity
-- Telegram alerts
 - Application tracking — track which jobs I actually apply to
 - Analyse application-to-interview conversion
 - Build a dashboard showing job-search trends
