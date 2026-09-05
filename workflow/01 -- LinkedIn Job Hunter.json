@@ -1,0 +1,631 @@
+{
+  "name": "01 -- LinkedIn Job Hunter",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 8
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        0,
+        -432
+      ],
+      "id": "2256feae-beb6-4d41-9dfb-1ccf7f3c874e",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "operation": "Run actor and get dataset",
+        "actorSource": "store",
+        "actorId": {
+          "__rl": true,
+          "value": "buIWk2uOUzTmcLsuB",
+          "mode": "list",
+          "cachedResultName": "Linkedin Post Search Scraper (No Cookies) (harvestapi/linkedin-post-search)",
+          "cachedResultUrl": "https://console.apify.com/actors/buIWk2uOUzTmcLsuB/input"
+        },
+        "customBody": "{\n  \"searchQueries\": [\n    \"hiring Data Analyst India\",\n    \"hiring Business Analyst India\",\n    \"hiring Power BI India\",\n    \"hiring MIS Analyst India\",\n    \"hiring Data Analytics India\",\n    \"looking for Data Analyst India\",\n    \"looking for Business Analyst India\"\n  ],\n  \"postedLimit\": \"24h\",\n  \"sortBy\": \"date\",\n  \"maxPosts\": 400,\n  \"scrapeReactions\": false,\n  \"scrapeComments\": false\n}"
+      },
+      "type": "@apify/n8n-nodes-apify.apify",
+      "typeVersion": 1,
+      "position": [
+        224,
+        -432
+      ],
+      "id": "369563fe-d831-4879-a37a-835fd8a32cf3",
+      "name": "Run an Actor and get dataset",
+      "credentials": {
+        "apifyApi": {
+          "id": "RtlVqRjcFkFWsR05",
+          "name": "Apify account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\n\nconst seen = new Set();\nconst output = [];\n\nfor (const item of items) {\n  const data = item.json;\n\n  const url = data.linkedinUrl || '';\n\n  // Skip records without a LinkedIn post URL\n  if (!url) continue;\n\n  // Remove duplicate posts returned by different search queries\n  if (seen.has(url)) continue;\n\n  seen.add(url);\n\n  output.push({\n    json: {\n      postUrl: url,\n      postId: data.id || '',\n      content: data.content || '',\n      \n      authorName: data.author?.name || '',\n      authorHeadline: data.author?.info || '',\n      authorUrl: data.author?.linkedinUrl || '',\n      \n      company: data.company?.name || '',\n      \n      postedAt: data.postedAt || '',\n      \n      reactions: data.reactions?.likes || 0,\n      comments: data.comments?.count || 0\n    }\n  });\n}\n\nreturn output;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        448,
+        -432
+      ],
+      "id": "eb00ce9f-8d6c-4a5c-a03a-12d1dbb578ab",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an expert LinkedIn job-post evaluator and personal job-matching assistant.\n\nYour task is to evaluate ONE LinkedIn FEED POST at a time and determine whether it is a genuine, relevant and worthwhile job/internship opportunity for the candidate described below.\n\nIMPORTANT:\nYou are NOT simply checking whether the post contains \"Data Analyst\", \"Business Analyst\", etc.\n\nYou must evaluate:\n\n1. What role is actually being advertised?\n2. Is this a genuine hiring opportunity?\n3. Who posted the opportunity?\n4. Does the author appear to be a recruiter, HR professional, talent acquisition specialist, hiring manager, company employee, manager, founder, or generic job-content creator?\n5. What experience level is actually required?\n6. Is the candidate's experience level suitable?\n7. Does the candidate's skillset match the requirements?\n8. Is the job located in India?\n9. Is there a legitimate way to apply?\n10. Does the post contain suspicious/scam/job-aggregator/paid-community signals?\n11. What is the final priority for this candidate?\n\nDo not make decisions from one keyword alone.\nRead the entire post and reason about the combination of signals.\n\n\n========================================================\nCANDIDATE PROFILE\n========================================================\n\nTarget candidate:\n\nName: Dhiraj Mahato\n\nPrimary target:\nData Analyst / entry-level Data & BI roles\n\nEducation:\nB.Tech in Data Science, expected 2028.\n\nExperience:\nData Analyst Intern at AtliQ Technologies.\nInternship experience includes Excel, SQL and Power BI, data processing, reporting automation, dashboards and data analysis.\n\nImportant certification:\nMicrosoft Certified: Power BI Data Analyst Associate (PL-300).\n\nCore technical skills:\n\nBI / Visualization:\n- Power BI\n- DAX\n- Data Modeling\n- Dashboard Development\n- KPI Reporting\n\nData Analytics:\n- SQL\n- Python\n- Excel\n- Data Cleaning\n- Exploratory Data Analysis\n- Statistical Analysis\n- Business Analysis\n\nMicrosoft Fabric:\n- Lakehouse\n- Warehouse\n- OneLake\n- Data Pipelines\n- PySpark\n- Medallion Architecture\n\nData Engineering:\n- ETL / ELT\n- Data Transformation\n- Data Integration\n- Data Warehousing\n- Batch Processing\n\nCloud / Databases:\n- Azure SQL\n- Microsoft Azure\n- AWS\n- AWS S3\n- AWS Glue\n- AWS Lambda\n- AWS Athena\n- Snowflake\n- MySQL\n\nProgramming:\n- Python\n- Pandas\n- NumPy\n- Matplotlib\n- PySpark\n- SQL\n\nProjects include:\n- EV market intelligence using Microsoft Fabric, PySpark, Power BI, SQL and Azure SQL\n- Large-scale dashboard and analytics work\n- Business reporting and data analysis\n- Hospitality and consumer-goods analytics projects\n\nThe candidate is primarily seeking FRESHER / ENTRY-LEVEL opportunities.\n\nThe candidate's preferred experience priority is:\n\nHIGHEST PRIORITY:\n- Fresher\n- 0 years\n- 0–1 year\n- Entry level\n- Fresh graduates\n- Final-year students\n- No experience required\n- Internship / trainee roles\n\nSECOND PRIORITY:\n- 1–2 years\n\nLOW PRIORITY:\n- 2–3 years\n\nREJECT:\n- More than 3 years\n- Senior roles\n- Lead roles\n- Manager roles\n- Senior Analyst roles requiring substantial experience\n\nIMPORTANT:\nDo NOT treat the candidate as a normal experienced Data Analyst.\nThe candidate is primarily an entry-level/fresher candidate with internship experience.\n\n========================================================\nTARGET ROLES\n========================================================\n\nHighest priority roles:\n\n- Data Analyst\n- Junior Data Analyst\n- Associate Data Analyst\n- Data Analytics Analyst\n- Analytics Analyst\n- BI Analyst\n- Business Intelligence Analyst\n- Reporting Analyst\n- Data Reporting Analyst\n- MIS Analyst\n- MIS Executive\n- MIS Reporting Analyst\n- Power BI Analyst\n- Junior Power BI Developer\n- Data & Business Analyst\n- Data and Business Analyst\n\nGood roles when entry-level or junior:\n\n- Business Analyst\n- Junior Business Analyst\n- Associate Business Analyst\n- Power BI Developer\n- BI Developer\n- Analytics Engineer\n- Junior Analytics Engineer\n- Product Analyst\n- Operations Analyst\n\nDo NOT match a role merely because it contains the word \"Analyst\".\n\nFor example:\n\nMedical Coding Analyst\nResearch Analyst\nFinancial Analyst\nCredit Analyst\nClinical Analyst\nData Quality Analyst\nFraud Analyst\nRisk Analyst\n\nmust be evaluated based on the actual responsibilities, required domain knowledge, certifications and skills.\n\nIf the role is heavily specialized and does not reasonably match the candidate's skills, mark role_match as Weak or Reject.\n\n========================================================\nEXPERIENCE RULE — VERY IMPORTANT\n========================================================\n\nExperience is one of the strongest filters.\n\nUse the following priority:\n\nFRESHER / ENTRY LEVEL\n→ Highest priority\n\n0–1 YEAR\n→ Highest priority\n\n1–2 YEARS\n→ High priority\n\n2–3 YEARS\n→ Low priority\n\nMORE THAN 3 YEARS\n→ Reject\n\nSenior / Lead / Manager\n→ Reject unless the post clearly states that no substantial experience is required, which is extremely unlikely.\n\nExamples:\n\n\"Freshers welcome\"\n→ Excellent\n\n\"Freshers can apply\"\n→ Excellent\n\n\"Final-year students welcome\"\n→ Excellent\n\n\"0–1 years\"\n→ Excellent\n\n\"0–2 years\"\n→ Excellent\n\n\"1–2 years\"\n→ High priority\n\n\"1–3 years\"\n→ Low priority because the upper end exceeds the candidate's preferred range.\n\n\"2–3 years\"\n→ Low priority\n\n\"3+ years\"\n→ Reject\n\n\"3–5 years\"\n→ Reject\n\n\"5+ years\"\n→ Reject\n\n\"7+ years\"\n→ Reject\n\n\"Senior Business Analyst\"\n→ Reject\n\nDo NOT allow strong skill overlap or recruiter credibility to override a clear 3+ year requirement.\n\nA genuine job can still be unsuitable for this candidate.\n\n========================================================\nLOCATION RULE\n========================================================\n\nIndia is required.\n\nStrong matches include:\n\n- India\n- Indian cities\n- Bengaluru / Bangalore\n- Hyderabad\n- Chennai\n- Mumbai\n- Pune\n- Delhi\n- Noida\n- Gurugram / Gurgaon\n- Kolkata\n- Ahmedabad\n- Jaipur\n- Lucknow\n- Kochi / Cochin\n- Visakhapatnam / Vizag\n- Mohali\n- Chandigarh\n- Remote within India\n\nIf the post is clearly for:\n\n- USA\n- Canada\n- UK\n- Europe\n- Belgium\n- Philippines\n- Australia\n- UAE\n- or another country\n\nthen location_match should be No unless the post explicitly states that the role can be performed remotely from India.\n\nDo NOT assume \"Remote\" means India.\n\nIf the post says \"Remote\" but does not identify whether India is eligible, treat the location as Unclear rather than automatically assuming India.\n\n========================================================\nAUTHOR / POSTER ANALYSIS\n========================================================\n\nThe person who posted the LinkedIn post is important.\n\nStrong positive author signals:\n\n- Recruiter\n- Technical Recruiter\n- Senior Recruiter\n- Talent Acquisition\n- Talent Acquisition Specialist\n- Talent Acquisition Partner\n- Talent Acquisition Manager\n- Recruitment Specialist\n- Recruitment Manager\n- HR Recruiter\n- HR Manager\n- Human Resources\n- Human Resources Manager\n- Hiring Manager\n- Corporate Recruiter\n- Staffing Recruiter\n\nThese indicate a strong probability that the person is directly involved in hiring.\n\nOther positive signals:\n\n- Founder\n- Co-Founder\n- CEO\n- Director\n- Manager\n- Team Lead\n- Head of Department\n- Operations Manager\n- Department Manager\n- Company employee clearly advertising an opening for their organization\n\nHowever:\n\nRecruiter/HR is NOT mandatory.\n\nA legitimate hiring post can be posted by an operations manager, team lead, founder, company employee, etc.\n\nGeneric job-content creators should receive less credibility than actual recruiters or company employees.\n\nExamples of weaker author signals:\n\n- Job Updates\n- Job Alerts\n- Career Influencer\n- Tech Creator\n- Job Creator\n- Connecting Job Seekers\n- Follow for Jobs\n- Daily Job Updates\n\nThese do NOT automatically mean the post is fake.\n\nInstead, reduce authenticity/author credibility unless there are strong additional signals such as a company identity, detailed role, legitimate application method, company email or verified LinkedIn job.\n\n========================================================\nAPPLICATION METHOD\n========================================================\n\nA company email is GOOD but NOT mandatory.\n\nValid application methods include:\n\n1. Company-domain email\n2. Official company careers page\n3. Official application page\n4. LinkedIn Job\n5. LinkedIn verified job\n6. Application link\n7. lnkd.in application link\n8. Recruiter asks candidate to send CV by LinkedIn DM\n9. Identifiable recruiter asks for CV\n10. Company employee asks candidates to apply through a legitimate channel\n\nIMPORTANT:\n\nA URL such as:\n\nhttps://lnkd.in/xxxxx\n\nmust be treated as a VALID APPLICATION LINK.\n\nDo NOT reject a post simply because the URL is shortened.\n\nGoogle Forms are NOT mandatory.\n\nDo NOT require a Google Form.\n\nDo NOT require a company email.\n\nDo NOT require both email AND URL.\n\nA legitimate job can have only an application link.\n\nA legitimate job can have only a company email.\n\nA legitimate recruiter can ask candidates to DM their resume.\n\n========================================================\nPHONE / WHATSAPP / TELEGRAM RULE\n========================================================\n\nPhone number alone is NOT a strong application method.\n\nIf the only application method is:\n\n- phone call\n- WhatsApp\n- Telegram\n\nthen application_strength should be Weak.\n\nIf a phone number appears together with a legitimate company email or application link, do NOT reject the post.\n\nFor example:\n\nCompany email + phone number\n→ Good\n\nApplication link + phone number\n→ Good\n\nCompany email + application link + phone number\n→ Very strong\n\nPhone number only\n→ Weak / suspicious\n\nWhatsApp only\n→ Weak\n\nTelegram only\n→ Weak\n\n========================================================\nAUTHENTICITY ANALYSIS\n========================================================\n\nEvaluate whether the post appears to represent a real hiring opportunity.\n\nPositive authenticity signals:\n\n- Clearly named company\n- Company employee posting\n- Recruiter/HR/Talent Acquisition author\n- Company-domain email\n- Official company application page\n- LinkedIn verified job\n- Detailed job responsibilities\n- Specific location\n- Specific experience requirement\n- Specific skills\n- Clear application instructions\n- Company identity is consistent between author, company and email domain\n\nNegative authenticity signals:\n\n- Paid community\n- Paid WhatsApp group\n- Paid Telegram group\n- Payment required\n- Registration fee\n- Application fee\n- Pay to apply\n- Paid mentorship\n- Paid course\n- Bootcamp\n- Job alert channel\n- Daily job updates channel\n- \"DM to join\"\n- \"Subscribe for jobs\"\n- No identifiable company\n- No meaningful job details\n- Only phone/WhatsApp/Telegram contact\n- Suspicious request for money\n- Candidate must pay to receive job details\n\nIMPORTANT:\n\nDo NOT mark a post as fake merely because:\n\n- it has no company email\n- it uses a Gmail address\n- it uses lnkd.in\n- it asks candidates to DM\n- it is posted by someone who is not a recruiter\n- it contains a referral request\n- it says \"share this post\"\n\nJudge the entire context.\n\n========================================================\nRECRUITER + COMPANY EMAIL SIGNAL\n========================================================\n\nA strong combination is:\n\nRecruiter/HR author\n+\nTarget role\n+\nIndia\n+\nSuitable experience\n+\nRelevant skills\n+\nCompany-domain email/application link\n\nThis should receive a high score.\n\nExample:\n\n\"Senior Technical Recruiter at Company\"\n+\n\"Hiring Data Analyst\"\n+\n\"SQL, Power BI, Python\"\n+\n\"recruiter@company.com\"\n\nThis is a highly valuable opportunity.\n\n========================================================\nSKILLS MATCHING\n========================================================\n\nCompare the job requirements against the candidate's actual skills.\n\nStrong candidate skills include:\n\nSQL\nPower BI\nExcel\nPython\nDAX\nData Analysis\nData Cleaning\nEDA\nDashboard Development\nData Visualization\nData Modeling\nKPI Reporting\nMicrosoft Fabric\nPySpark\nETL\nData Transformation\nAzure SQL\nAWS\nSnowflake\nMySQL\nPandas\nNumPy\n\nStrong matches include jobs requiring:\n\n- SQL\n- Power BI\n- Excel\n- Python\n- dashboards\n- reporting\n- data analysis\n- data visualization\n- business reporting\n- KPI reporting\n- data cleaning\n- ETL\n- data transformation\n- Power Query\n- business analysis\n\nPreferred-but-not-required skills should NOT automatically cause rejection.\n\nFor example:\n\nJob requires:\nSQL + Power BI + Excel + Tableau\n\nCandidate has:\nSQL + Power BI + Excel\n\nThis is still a strong match.\n\nTableau is a missing preferred skill, not necessarily a rejection.\n\nSimilarly:\n\nJob requires:\nExcel + Google Sheets + SQL + dashboards\n\nThis is a strong match because the candidate has Excel, SQL, dashboard development and data analysis.\n\n========================================================\nMANDATORY SKILLS\n========================================================\n\nPay special attention to words such as:\n\n- mandatory\n- must have\n- required\n- essential\n- compulsory\n\nIf a mandatory requirement is a highly specialized certification/domain skill that the candidate clearly does not have, reduce eligibility significantly or reject.\n\nExample:\n\n\"Medical Coding Analyst\"\n+\n\"CPC Certification mandatory\"\n+\n\"2+ years medical coding experience\"\n\n→ Reject.\n\nHowever, ordinary preferred skills should not cause rejection.\n\n========================================================\nROLE SENIORITY\n========================================================\n\nDetermine the actual seniority.\n\nStrong fit:\n\n- Fresher\n- Intern\n- Trainee\n- Junior\n- Associate\n- Entry Level\n\nGood:\n\n- Analyst\n- Data Analyst\n- MIS Analyst\n- MIS Executive\n- Business Analyst\n\nLow:\n\n- Experienced Analyst\n- 2–3 years\n\nReject:\n\n- Senior Analyst\n- Senior Data Analyst\n- Lead Analyst\n- Lead Data Scientist\n- Manager\n- Senior Manager\n- Principal\n- Architect\n- Head\n- Director\n\n========================================================\nSPECIALIZED ROLE RULE\n========================================================\n\nDo not give a high score simply because the title contains \"Data\", \"Analyst\", \"BI\", or \"Analytics\".\n\nEvaluate the actual work.\n\nExamples:\n\n\"Data Analyst\"\n→ potentially strong\n\n\"Data Analyst - SQL + Power BI + Excel\"\n→ very strong\n\n\"MIS Analyst - Excel + SQL + reporting\"\n→ strong\n\n\"Power BI Analyst\"\n→ strong\n\n\"Business Analyst - reporting + SQL + dashboards\"\n→ potentially strong\n\n\"Medical Coding Analyst - CPC mandatory\"\n→ poor\n\n\"Data Quality Analyst - MDM + governance + 7 years\"\n→ reject\n\n\"Business Analyst - M&A + SAP + 7 years\"\n→ reject\n\n\"Senior Business Analyst - AI Automation + extensive experience\"\n→ reject/low\n\n========================================================\nINTERNSHIPS\n========================================================\n\nInternships are valid and can receive a very high priority.\n\nEspecially:\n\n- Data Analyst Intern\n- Business Analyst Intern\n- Data Analytics Intern\n- BI Intern\n- Power BI Intern\n- Data Engineering Intern\n\nIf the internship is in India and the candidate's skills match, it can receive P1 priority.\n\nFreshers/final-year students are especially relevant.\n\n========================================================\nFINAL PRIORITY SYSTEM\n========================================================\n\nAssign one of these priorities:\n\nP1\nHighest priority.\nExcellent opportunity.\nCandidate should apply as soon as possible.\n\nP2\nGood opportunity.\nStrong enough to apply, but below P1.\n\nP3\nLow priority.\nPotentially relevant but has meaningful concerns such as 2–3 years experience, weaker role fit, weaker author credibility, or weaker application method.\n\nREJECT\nDo not recommend applying.\n\nPriority should consider:\n\n1. Experience\n2. Role match\n3. Skills match\n4. Location\n5. Author credibility\n6. Application legitimacy\n7. Authenticity\n8. Overall suitability\n\nExperience priority:\n\nFresher / 0–1\n→ strong P1 factor\n\n1–2\n→ strong P1/P2 factor\n\n2–3\n→ P3 unless exceptionally strong and clearly worth considering\n\n3+\n→ REJECT\n\n========================================================\nSCORING SYSTEM\n========================================================\n\nGive a match_score from 0 to 100.\n\nUse approximately:\n\nRole relevance: 25 points\nExperience fit: 25 points\nSkills match: 20 points\nAuthor credibility: 15 points\nApplication legitimacy: 10 points\nIndia/location match: 5 points\n\nTotal: 100\n\nImportant:\nThe score is NOT a mathematical requirement to blindly follow.\nUse professional judgment.\n\nA clear hard failure can override the numerical score.\n\nExamples:\n\n3+ years required\n→ REJECT even if skills are excellent.\n\nOutside India\n→ REJECT unless India remote eligibility is explicitly supported.\n\nPaid application\n→ REJECT.\n\nClearly unrelated specialized role\n→ REJECT.\n\n========================================================\nRECOMMENDATION RULES\n========================================================\n\nUse:\n\n\"APPLY ASAP\"\nfor excellent P1 opportunities.\n\n\"APPLY\"\nfor strong P2 opportunities.\n\n\"CONSIDER\"\nfor P3 opportunities.\n\n\"DO NOT APPLY\"\nfor rejected opportunities.\n\n========================================================\nIMPORTANT EXAMPLES OF THE TYPE OF RESULT EXPECTED\n========================================================\n\nExample 1:\n\nHR Manager / Talent Acquisition\n+\nUrgent Data Analyst hiring\n+\nIndia\n+\nExcel + Google Sheets + SQL + dashboards\n+\ncompany email\n\n→ Very strong opportunity.\n\nEven if a specialized industry requirement exists, evaluate whether it is mandatory and whether the candidate can reasonably apply.\n\nExample 2:\n\nData Analyst / Data Engineer Intern\n+\nFreshers welcome\n+\nFinal-year students welcome\n+\nIndia\n+\nPython + SQL + Data Analytics\n+\nlnkd.in application link\n\n→ Excellent opportunity for this candidate.\nLikely P1.\n\nExample 3:\n\nMIS Executive / MIS Analyst\n+\n1–2 years\n+\nExcel + Google Sheets + SQL\n+\nIndia\n+\nlnkd.in application link\n\n→ Strong opportunity.\nLikely P1 or P2.\n\nExample 4:\n\nBusiness Analyst\n+\n1–2 years\n+\nIndia\n+\nHR Manager posting\n+\nlnkd.in application link\n\n→ Strong opportunity if skills are reasonably aligned.\n\nExample 5:\n\nData Quality Analyst\n+\n7+ years\n+\nRecruiter\n+\ncompany email\n\n→ REJECT.\nThe recruiter and company email establish authenticity, but the experience requirement makes it unsuitable.\n\nExample 6:\n\nResearch Analyst\n+\n3 years\n+\nHR posting\n+\ncompany email\n\n→ REJECT or extremely low priority because the candidate is targeting fresher/entry-level opportunities and does not want more than 2 years as a normal target.\n\nExample 7:\n\nBusiness Analyst\n+\n7+ years\n+\nTalent Acquisition\n+\ncompany email\n\n→ REJECT.\n\nExample 8:\n\nMedical Coding Analyst\n+\n2+ years\n+\nCPC mandatory\n+\nhealthcare coding experience\n\n→ REJECT because the role is specialized and does not match the candidate's background.\n\nExample 9:\n\nPower BI Developer\n+\nIndia\n+\nno experience stated\n+\nPower BI + SQL\n+\napplication email\n\n→ Potentially strong.\nDo not reject just because experience is not explicitly stated.\n\nExample 10:\n\nData Analyst\n+\n\"DM me\"\n+\nno company\n+\nno location\n+\nno application link\n+\ngeneric job-content creator\n\n→ Low authenticity / low application strength.\nLikely REJECT unless other evidence establishes legitimacy.\n\n========================================================\nIMPORTANT DISTINCTION\n========================================================\n\nYou must keep these concepts separate:\n\nAUTHENTICITY\n=\nDoes this appear to be a genuine hiring opportunity?\n\nELIGIBILITY\n=\nIs this opportunity suitable for Dhiraj?\n\nA post can be:\n\nAuthenticity = High\nbut\nEligibility = Poor\n\nFor example:\n\nA genuine recruiter advertising a 7-year Data Analyst position.\n\nThat should be rejected for Dhiraj even though the post itself is genuine.\n\n========================================================\nDO NOT OVER-REJECT\n========================================================\n\nDo NOT reject a post merely because:\n\n- company email is missing\n- application URL is missing\n- recruiter is missing\n- the author is not HR\n- the author is a founder\n- the author is a manager\n- the author is an employee\n- application uses lnkd.in\n- application asks for LinkedIn DM\n- post contains a phone number\n- post says referral\n- post says share this post\n- some preferred skill is missing\n\nOnly reject when there is a meaningful reason.\n\n========================================================\nOUTPUT REQUIREMENT\n========================================================\n\nReturn ONLY ONE valid JSON object.\n\nDo NOT use Markdown.\n\nDo NOT use code fences.\n\nDo NOT add explanations before or after the JSON.\n\nDo NOT return multiple JSON objects.\n\nDo NOT return null.\n\nDo NOT return undefined.\n\nDo NOT add fields that are not included in the required schema.\n\nArrays must remain arrays.\n\nmatch_score must be an integer from 0 to 100.\n\n========================================================\nREQUIRED JSON\n========================================================\n\n{\n  \"post_url\": \"\",\n  \"author_name\": \"\",\n  \"author_headline\": \"\",\n  \"company\": \"\",\n  \"posted_at\": \"\",\n  \"match_score\": 0,\n  \"hiring_intent\": \"HIGH\",\n  \"eligibility\": \"Strong Match\",\n  \"recommendation\": \"APPLY ASAP\",\n  \"role_match\": \"Strong\",\n  \"job_location\": \"India\",\n  \"location_match\": \"Match\",\n  \"company_email\": \"\",\n  \"email_domain_match\": \"Match\",\n  \"application_method\": \"Company Email + Application Link\",\n  \"authenticity\": \"High\",\n  \"skills_matched\": [],\n  \"missing_required_skills\": [],\n  \"missing_preferred_skills\": [],\n  \"experience_match\": \"Strong\",\n  \"experience_concern\": \"\",\n  \"work_authorization_concern\": \"\",\n  \"education_match\": \"Strong\",\n  \"certification_relevance\": \"\",\n  \"reason\": \"\"\n}\n\n========================================================\nFIELD RULES\n========================================================\n\nhiring_intent:\nUse:\n\"HIGH\"\n\"MEDIUM\"\n\"LOW\"\n\neligibility:\nUse:\n\"Strong Match\"\n\"Moderate Match\"\n\"Weak Match\"\n\"Not Eligible\"\n\nrecommendation:\nUse:\n\"APPLY ASAP\"\n\"APPLY\"\n\"CONSIDER\"\n\"DO NOT APPLY\"\n\nrole_match:\nUse:\n\"Strong\"\n\"Moderate\"\n\"Weak\"\n\"Reject\"\n\nlocation_match:\nUse:\n\"Match\"\n\"Unclear\"\n\"No Match\"\n\nemail_domain_match:\nUse:\n\"Match\"\n\"Free Email\"\n\"Not Available\"\n\napplication_method:\nDescribe the actual strongest application method.\n\nExamples:\n\"Company Email\"\n\"Company Email + Application Link\"\n\"Application Link\"\n\"LinkedIn Job\"\n\"Recruiter DM\"\n\"Company Careers Page\"\n\"Phone Only\"\n\"WhatsApp Only\"\n\"Unknown\"\n\nauthenticity:\nUse:\n\"High\"\n\"Medium\"\n\"Low\"\n\"Suspicious\"\n\nexperience_match:\nUse:\n\"Strong\"\n\"Moderate\"\n\"Weak\"\n\"Not Eligible\"\n\neducation_match:\nUse:\n\"Strong\"\n\"Moderate\"\n\"Weak\"\n\"Unknown\"\n\nskills_matched:\nList only skills from the job post that genuinely match the candidate.\n\nmissing_required_skills:\nList only genuinely required/must-have skills that the candidate clearly lacks.\n\nmissing_preferred_skills:\nList preferred/nice-to-have skills that the candidate does not have.\n\nexperience_concern:\nBriefly state the experience issue if one exists.\n\nwork_authorization_concern:\nState any location/work authorization issue.\nIf none, use an empty string.\n\ncertification_relevance:\nExplain whether the candidate's PL-300 or other certifications help with this role.\nIf not relevant, use an empty string.\n\nreason:\nGive a concise but useful explanation of WHY this opportunity received this score and recommendation.\n\nThe reason MUST mention the most important positive and negative factors.\n\n========================================================\nFINAL SILENT VALIDATION\n========================================================\n\nBefore returning the JSON, silently verify:\n\n1. Is this actually a hiring opportunity?\n2. Is the role relevant?\n3. Is the role suitable for an entry-level/fresher candidate?\n4. Is experience <= 2 years ideal, 2–3 years low priority, and >3 years rejected?\n5. Is the location India or explicitly India-remote?\n6. Did I evaluate who posted the post?\n7. Did I reward genuine recruiter/HR/hiring signals?\n8. Did I avoid requiring a recruiter?\n9. Did I avoid requiring a company email?\n10. Did I recognize lnkd.in as a valid application link?\n11. Did I evaluate the actual application method?\n12. Did I distinguish authenticity from eligibility?\n13. Did I compare skills with the candidate's actual skills?\n14. Did I avoid rejecting merely because a preferred skill is missing?\n15. Did I reject specialized roles that clearly do not fit?\n16. Did I reject paid/scam/job-alert content?\n17. Is the score consistent with the recommendation?\n18. Is the final response exactly one valid JSON object?\n19. Are all required fields present?\n20. Are there no extra fields?\n\n========================================================\nLINKEDIN POST TO EVALUATE\n========================================================\n\nThe following JSON contains the actual LinkedIn post and author information for this evaluation.\n\nYou MUST evaluate this specific post.\n\nPOST DATA:\n\n{{ JSON.stringify($json, null, 2) }}",
+        "hasOutputParser": true,
+        "needsFallback": true,
+        "messages": {
+          "messageValues": []
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        1184,
+        -432
+      ],
+      "id": "e911bd50-ae9b-4885-9949-64e42e20b2c1",
+      "name": "Basic LLM Chain",
+      "retryOnFail": true,
+      "waitBetweenTries": 5000
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\n\nconst HR_AUTHOR = /\\b(human resources?|talent acquisition|recruiter|recruitment|hiring manager|hr\\b|hrbp|ta specialist|staffing|talent partner)\\b/i;\n\nconst OVER_EXPERIENCE = /\\b([4-9]|1[0-9])\\s*\\+?\\s*(years?|yrs?)\\b/i;\nconst SENIOR_TITLE = /\\b(senior|lead|principal|head of|director)\\b/i;\n\nconst HIRING_SIGNAL = /\\b(hiring|we're looking for|we are looking for|looking for|open position|join our team|immediate hiring|urgent hiring|recruitment|vacancy)\\b/i;\nconst PROMO_JUNK = /\\b(paid (community|bootcamp|mentorship|course)|telegram group|whatsapp group|dm for paid|resume writing service|course advertisement)\\b/i;\n\nconst ROLE_RELEVANT = /\\b(data analyst|data analytics analyst|analytics analyst|bi analyst|business intelligence analyst|power bi (analyst|developer)|reporting analyst|data reporting analyst|mis analyst|mis executive|data (&|and) business analyst|business analyst|product analyst|operations analyst|analytics engineer)\\b/i;\n\nconst FOREIGN_ONLY = /\\b(usa|united states|canada|\\buk\\b|united kingdom|philippines|manila|quezon city|belgium|brussels|singapore|dubai|uae|germany|australia)\\b/i;\nconst INDIA_SIGNAL = /\\b(india|bengaluru|bangalore|hyderabad|chennai|pune|mumbai|delhi|ncr|gurugram|gurgaon|noida|lucknow|ahmedabad|kolkata|chittoor|remote india|₹|inr\\b|lpa\\b|wfh)\\b/i;\n\nconst EMAIL_PATTERN = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}/;\nconst APPLICATION_LINK = /(https?:\\/\\/\\S+|lnkd\\.in\\/\\S+)/i;\n\nconst output = [];\n\nfor (const item of items) {\n  const d = item.json;\n  const content = (d.content || '');\n  const headline = (d.authorHeadline || '');\n\n  // Hard rejects: cheap, reliable, high-confidence signals only\n  if (!HR_AUTHOR.test(headline)) continue;\n  if (!HIRING_SIGNAL.test(content)) continue;\n  if (PROMO_JUNK.test(content)) continue;\n  if (!ROLE_RELEVANT.test(content)) continue;\n  if (OVER_EXPERIENCE.test(content)) continue;\n  if (SENIOR_TITLE.test(content)) continue;\n  if (FOREIGN_ONLY.test(content) && !INDIA_SIGNAL.test(content)) continue;\n\n  // Soft signals: attach for Gemini to weigh, don't reject here\n  const hasCompanyEmail = EMAIL_PATTERN.test(content);\n  const hasApplicationLink = APPLICATION_LINK.test(content);\n  const hasIndiaSignal = INDIA_SIGNAL.test(content);\n\n  output.push({\n    json: {\n      ...d,\n      hasCompanyEmail,\n      hasApplicationLink,\n      hasIndiaSignal\n    }\n  });\n}\n\nreturn output;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        672,
+        -432
+      ],
+      "id": "d201af55-73ff-49cb-b3db-a301681d50b0",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"post_url\": \"https://www.linkedin.com/posts/example\",\n  \"author_name\": \"Recruiter Name\",\n  \"author_headline\": \"Talent Acquisition\",\n  \"company\": \"Company Name\",\n  \"posted_at\": \"2026-09-04T10:00:00Z\",\n  \"match_score\": 90,\n  \"hiring_intent\": \"HIGH\",\n  \"eligibility\": \"Strong Match\",\n  \"recommendation\": \"APPLY ASAP\",\n  \"role_match\": \"Strong\",\n  \"job_location\": \"India\",\n  \"location_match\": \"Match\",\n  \"company_email\": \"careers@company.com\",\n  \"email_domain_match\": \"Match\",\n  \"application_method\": \"Company Email + Application Link\",\n  \"authenticity\": \"High\",\n  \"skills_matched\": [\n    \"SQL\",\n    \"Power BI\"\n  ],\n  \"missing_required_skills\": [],\n  \"missing_preferred_skills\": [],\n  \"experience_match\": \"Strong\",\n  \"experience_concern\": \"\",\n  \"work_authorization_concern\": \"\",\n  \"education_match\": \"Strong\",\n  \"certification_relevance\": \"Highly relevant\",\n  \"reason\": \"The role closely matches the candidate's target role, skills, experience level, certification, and location.\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        1392,
+        -224
+      ],
+      "id": "1cf21273-9922-4d5b-95ac-0129bcfefe22",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        896,
+        -432
+      ],
+      "id": "bdef5e9d-5aac-4f12-82e2-60673ae11a47",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "amount": 8
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1584,
+        -320
+      ],
+      "id": "deb82aad-ad21-45a9-b3b2-1188e0c479a7",
+      "name": "Wait",
+      "webhookId": "c50ea47a-62ce-42b2-aece-809586a15b0b"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "54048a53-999b-4953-8922-d5a1b6ea184e",
+              "leftValue": "={{ Number($json.output.match_score) }}",
+              "rightValue": 45,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1248,
+        -736
+      ],
+      "id": "29f49317-925c-41cc-a964-15fbfb152b83",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.5-flash-lite",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        1136,
+        -224
+      ],
+      "id": "0198b98c-96be-42f6-b2e2-4a9f2008c3e6",
+      "name": "Primary Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "aq9Cg54XsczohMCT",
+          "name": "Google Gemini(PaLM) Api account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.6-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        1264,
+        -224
+      ],
+      "id": "30c80065-ffaa-4a81-b23c-6168a98ad25a",
+      "name": "Secondary Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "aq9Cg54XsczohMCT",
+          "name": "Google Gemini(PaLM) Api account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1Tdnv_h1mrZxSKqwPGBEhuYhajJhohMNJlhoU1VjIocY",
+          "mode": "list",
+          "cachedResultName": "n8n_data",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Tdnv_h1mrZxSKqwPGBEhuYhajJhohMNJlhoU1VjIocY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Tdnv_h1mrZxSKqwPGBEhuYhajJhohMNJlhoU1VjIocY/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Post URL": "={{ $json.output.post_url }}",
+            "Posted At": "={{ $json.output.posted_at }}",
+            "Company": "={{ $json.output.company }}",
+            "Author Headline": "={{ $json.output.author_headline }}",
+            "Author": "={{ $json.output.author_name }}",
+            "Match Score": "={{ $json.output.match_score }}",
+            "Recommendation": "={{ $json.output.recommendation }}",
+            "Eligibility": "={{ $json.output.eligibility }}",
+            "Role Match": "={{ $json.output.role_match }}",
+            "Job Location": "={{ $json.output.job_location }}",
+            "Location Match": "={{ $json.output.location_match }}",
+            "Missing Required Skills": "={{ $json.output.missing_required_skills }}",
+            "Missing Preferred Skills": "={{ $json.output.missing_preferred_skills }}",
+            "Experience Match": "={{ $json.output.experience_match }}",
+            "Experience Concern": "={{ $json.output.experience_concern }}",
+            "Work Authorization Concern": "={{ $json.output.work_authorization_concern }}",
+            "Education Match": "={{ $json.output.education_match }}",
+            "Certification Relevance": "={{ $json.output.certification_relevance }}",
+            "Reason": "={{ $json.output.reason }}",
+            "Skills Matched": "={{ $json.output.skills_matched }}",
+            "Hiring Intent": "={{ $json.output.hiring_intent }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Date Found",
+              "displayName": "Date Found",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Post URL",
+              "displayName": "Post URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Author",
+              "displayName": "Author",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Author Headline",
+              "displayName": "Author Headline",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Company",
+              "displayName": "Company",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Posted At",
+              "displayName": "Posted At",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Match Score",
+              "displayName": "Match Score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Recommendation",
+              "displayName": "Recommendation",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Eligibility",
+              "displayName": "Eligibility",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Role Match",
+              "displayName": "Role Match",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Job Location",
+              "displayName": "Job Location",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Location Match",
+              "displayName": "Location Match",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Hiring Intent",
+              "displayName": "Hiring Intent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Skills Matched",
+              "displayName": "Skills Matched",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Missing Required Skills",
+              "displayName": "Missing Required Skills",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Missing Preferred Skills",
+              "displayName": "Missing Preferred Skills",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Experience Match",
+              "displayName": "Experience Match",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Experience Concern",
+              "displayName": "Experience Concern",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Work Authorization Concern",
+              "displayName": "Work Authorization Concern",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Education Match",
+              "displayName": "Education Match",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Certification Relevance",
+              "displayName": "Certification Relevance",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Reason",
+              "displayName": "Reason",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1584,
+        -736
+      ],
+      "id": "25f5402e-6a6f-46f0-9229-44bcf7f9d76e",
+      "name": "Append Data",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "0RLodNfOreQp1Ylt",
+          "name": "Google Sheets account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Run an Actor and get dataset",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Run an Actor and get dataset": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Append Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Primary Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Secondary Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 1
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "a430409a-15c2-4063-8034-2aaa776066bf",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "2cf2849b5ed4db57489ed29ac3f5247015ef6ef40c5e0092eb1ba3e49ee7b641"
+  },
+  "nodeGroups": [],
+  "id": "b3Ma6c4CC0FixWAt",
+  "tags": []
+}
